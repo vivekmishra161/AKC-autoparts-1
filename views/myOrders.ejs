@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>MY ORDERS</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+
+<style>
+  /* ===== PAGE ===== */
+body{
+  font-family:'Nunito Sans',sans-serif;
+  background:linear-gradient(135deg,#9ccfdd,#7fb8c9);
+  padding:30px 15px;
+}
+
+/* ===== HEADER BAR ===== */
+.header-bar{
+  max-width:1100px;
+  margin:0 auto 40px;
+  background:#fff;
+  border-radius:18px;
+  padding:16px 28px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  box-shadow:0 12px 30px rgba(0,0,0,.15);
+}
+
+.header-bar img{height:55px}
+.center-section h1{
+  margin:0;
+  font-size:30px;
+  font-weight:800;
+  letter-spacing:1px;
+}
+.right-section p{
+  margin:0;
+  font-size:14px;
+  color:#555;
+}
+
+/* ===== ORDERS WRAPPER ===== */
+.orders-wrapper{
+  max-width:1100px;
+  margin:0 auto;
+  display:flex;
+  flex-direction:column;
+  gap:40px;
+}
+
+/* ===== ORDER CARD ===== */
+.order-card{
+  background:#ffffff;
+  border-radius:22px;
+  padding:28px;
+  box-shadow:0 18px 40px rgba(0,0,0,.18);
+  position:relative;
+  transition:.3s ease;
+}
+
+.order-card:hover{
+  transform:translateY(-6px);
+  box-shadow:0 26px 55px rgba(0,0,0,.25);
+}
+
+/* ===== STATUS BADGE ===== */
+.status{
+  position:absolute;
+  top:22px;
+  right:22px;
+  padding:10px 22px;
+  border-radius:999px;
+  font-weight:700;
+  font-size:14px;
+}
+
+.placed-status{background:#dcfce7;color:#065f46}
+.delivered-status{background:#bbf7d0;color:#065f46}
+.cancelled-status{background:#fee2e2;color:#991b1b}
+
+/* ===== HEADER INFO ===== */
+.order-header{
+  display:grid;
+  grid-template-columns:1fr auto;
+  gap:12px;
+  margin-bottom:22px;
+}
+
+.order-header strong{color:#0f172a}
+
+/* ===== TIMELINE ===== */
+.timeline{
+  display:flex;
+  justify-content:space-between;
+  position:relative;
+  margin:28px 0 35px;
+}
+
+.timeline::before{
+  content:"";
+  position:absolute;
+  top:10px;
+  left:8%;
+  right:8%;
+  height:4px;
+  background:#e5e7eb;
+  border-radius:999px;
+}
+
+.timeline-step{
+  flex:1;
+  text-align:center;
+  position:relative;
+  z-index:1;
+}
+
+.circle{
+  width:22px;
+  height:22px;
+  border-radius:50%;
+  background:#d1d5db;
+  margin:0 auto;
+}
+
+.circle.active{
+  background:#10b981;
+  box-shadow:0 0 0 6px rgba(16,185,129,.25);
+}
+
+.timeline-step span{
+  display:block;
+  margin-top:10px;
+  font-size:13px;
+  font-weight:600;
+}
+
+/* ===== ITEMS ===== */
+.item-box{
+  background:#f9fafb;
+  border-radius:16px;
+  padding:18px 20px;
+  border:1px solid #e5e7eb;
+  margin-bottom:14px;
+  transition:.3s ease;
+}
+
+.item-box:hover{
+  transform:translateY(-3px);
+  box-shadow:0 10px 22px rgba(0,0,0,.15);
+}
+
+.item-box p{
+  margin:6px 0;
+  font-size:15px;
+}
+
+/* ===== ACTION ===== */
+.cancel-btn{
+  margin-top:18px;
+  padding:12px 26px;
+  border:none;
+  border-radius:12px;
+  background:linear-gradient(135deg,#ef4444,#dc2626);
+  color:#fff;
+  font-weight:700;
+  cursor:pointer;
+}
+
+.cancel-btn:hover{
+  transform:translateY(-2px);
+  box-shadow:0 10px 20px rgba(239,68,68,.4);
+}
+
+.delivered-text,
+.cancelled-text{
+  margin-top:18px;
+  font-size:18px;
+  font-weight:700;
+}
+
+.delivered-text{color:#065f46}
+.cancelled-text{color:#991b1b}
+
+/* ===== MOBILE ===== */
+@media(max-width:768px){
+  .order-card{padding:20px}
+  .timeline::before{left:5%;right:5%}
+}
+/* POPUP OVERLAY */
+/* POPUP OVERLAY */
+#confirmPopup,
+#successPopup {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  display: none;              /* default hidden */
+  align-items: center;        /* center vertically */
+  justify-content: center;    /* center horizontally */
+  z-index: 9999;
+}
+
+/* POPUP BOX */
+.popup-content {
+  background: #ffffff;
+  padding: 28px 34px;
+  border-radius: 16px;
+  text-align: center;
+  max-width: 380px;
+  width: 90%;
+  box-shadow: 0 20px 45px rgba(0,0,0,0.25);
+  animation: popIn 0.25s ease-in-out;
+}
+
+.popup-content h3 {
+  margin: 0 0 10px;
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.popup-content p {
+  font-size: 15px;
+  color: #374151;
+}
+
+.popup-buttons {
+  margin-top: 18px;
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+}
+
+.yes-btn {
+  background: #ef4444;
+  color: #fff;
+  padding: 10px 22px;
+  border-radius: 10px;
+  border: none;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.no-btn {
+  background: #6b7280;
+  color: #fff;
+  padding: 10px 22px;
+  border-radius: 10px;
+  border: none;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.yes-btn:hover { background: #dc2626; }
+.no-btn:hover { background: #4b5563; }
+
+
+</style>
+</head>
+
+<body>
+<!-- HEADER BAR -->
+<div class="header-bar">
+    <div class="left-section">
+        <img src="https://th.bing.com/th/id/R.35647c0cec927537fa43ed1836a446c2?rik=7Lzu71WwPczowA&riu=http%3a%2f%2fpluspng.com%2fimg-png%2fhyundai-logo-png-hyundai-car-logo-png-brand-image-1749.png&ehk=UI8O%2bS7ci5lpalKI9Rf1u%2bMYvCgw%2bVwAeupMAcxmk2g%3d&risl=&pid=ImgRaw&r=0" alt="Logo">
+    </div>
+
+    <div class="center-section">
+        <h1>MY ORDERS</h1>
+    </div>
+
+    <div class="right-section">
+        <p>Parts for Hyundai • Tata • Bajaj</p>
+    </div>
+</div>
+<!-- ORDERS CONTAINER -->
+<div class="orders-wrapper">
+
+  <% if (orders.length === 0) { %>
+    <p style="text-align:center;font-size:20px;color:#333;">
+      You have not placed any orders yet.
+    </p>
+  <% } %>
+
+  <% orders.forEach(order => { %>
+
+    <%
+      const orderDate = new Date(order.createdAt);
+      const now = new Date();
+      const diffDays = Math.floor((now - orderDate) / (1000 * 60 * 60 * 24));
+    %>
+
+    <!-- ORDER CARD -->
+    <div class="order-card">
+
+      <!-- STATUS BADGE -->
+      <% if (order.status === "Pending") { %>
+        <span class="status placed-status">Order Placed</span>
+      <% } else if (order.status === "Delivered") { %>
+        <span class="status delivered-status">Delivered</span>
+      <% } else { %>
+        <span class="status cancelled-status">Cancelled</span>
+      <% } %>
+
+      <!-- HEADER -->
+      <div class="order-header">
+        <div>
+          <p><strong>Order Date:</strong> <%= orderDate.toDateString() %></p>
+          <p><strong>Total Price:</strong> ₹<%= order.totalPrice %></p>
+          <p><strong>Delivery Date:</strong> <%= order.deliveryDate %></p>
+        </div>
+      </div>
+
+      <!-- TIMELINE -->
+    <div class="timeline">
+
+  <!-- PLACED -->
+  <div class="timeline-step">
+    <div class="circle active"></div>
+    <span>Placed</span>
+  </div>
+
+  <!-- PACKED -->
+  <div class="timeline-step">
+    <div class="circle
+      <%= (diffDays >= 2 || order.status === 'Delivered') && order.status !== 'Cancelled'
+        ? 'active'
+        : '' %>">
+    </div>
+    <span>Packed</span>
+  </div>
+
+  <!-- DELIVERED -->
+  <div class="timeline-step">
+    <div class="circle
+      <%= order.status === 'Delivered' ? 'active' : '' %>">
+    </div>
+    <span>Delivered</span>
+  </div>
+
+</div>
+
+      <!-- ITEMS -->
+      <% order.items.forEach(item => { %>
+        <div class="item-box">
+          <p>Name: <%= item.name %></p>
+          <p>Product ID: <%= item.id %></p>
+          <p>Price: ₹<%= item.price %></p>
+          <p>Quantity: <%= item.qty %></p>
+        </div>
+      <% }) %>
+
+      <!-- ACTION -->
+      <% if (order.status === "Pending") { %>
+        <button class="cancel-btn" onclick="cancelOrder('<%= order._id %>')">
+          Cancel Order
+        </button>
+      <% } else if (order.status === "Delivered") { %>
+        <p class="delivered-text">Order Delivered ✔</p>
+      <% } else { %>
+        <p class="cancelled-text">Order Cancelled ✖</p>
+      <% } %>
+
+    </div>
+    <!-- END ORDER CARD -->
+
+  <% }) %>
+
+ </div>
+
+
+<!-- CONFIRM CANCEL POPUP -->
+<div id="confirmPopup">
+  <div class="popup-content">
+    <h3>Cancel Order</h3>
+    <p>Are you sure you want to cancel this order?</p>
+    <div class="popup-buttons">
+      <button class="yes-btn" onclick="confirmCancel()">Yes</button>
+      <button class="no-btn" onclick="closeConfirm()">No</button>
+    </div>
+  </div>
+</div>
+
+<!-- SUCCESS POPUP -->
+<div id="successPopup">
+  <div class="popup-content">
+    <h3>Cancelled</h3>
+    <p>Order Cancelled Successfully ✔</p>
+  </div>
+</div>
+
+<script>
+let currentOrderId = null;
+
+function cancelOrder(orderId) {
+  currentOrderId = orderId;
+  document.getElementById("confirmPopup").style.display = "flex";
+}
+
+function closeConfirm() {
+  document.getElementById("confirmPopup").style.display = "none";
+}
+
+function confirmCancel() {
+  document.getElementById("confirmPopup").style.display = "none";
+
+  fetch(`/cancel-order/${currentOrderId}`, { method: "POST" })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        document.getElementById("successPopup").style.display = "flex";
+
+        setTimeout(() => {
+          document.getElementById("successPopup").style.display = "none";
+          location.reload();
+        }, 1500);
+      }
+    });
+}
+</script>
+
+</body>
+</html>

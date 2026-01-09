@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+  <title>Sign In - AKC Auto Parts</title>
+
+  <style>
+    body { font-family: 'Nunito Sans'; background:#f3f4f6; padding:40px; display:flex; justify-content:center; }
+    .box { background:#fff; padding:25px; border-radius:10px; width:350px; box-shadow:0 4px 12px rgba(0,0,0,0.1); }
+    h2 { text-align:center; }
+    label { font-weight:bold; margin-top:10px; display:block; }
+    input { width:100%; padding:8px; margin-top:5px; border:1px solid #ccc; border-radius:6px; }
+    button { width:100%; margin-top:16px; padding:10px; background:#111827; color:white; border-radius:8px; border:none; cursor:pointer; }
+    button:hover { background:#1f2937; }
+    p { text-align:center; margin-top:12px; }
+
+    /* popup */
+    .popup-overlay {
+      position:fixed; inset:0; background:rgba(0,0,0,0.45); display:none; z-index:99;
+    }
+    .popup-box {
+      position:fixed; top:50%; left:50%; transform:translate(-50%, -50%);
+      background:white; padding:20px 35px; border-radius:10px; display:none;
+      font-size:18px; text-align:center; box-shadow:0 0 20px rgba(0,0,0,0.3); z-index:100;
+      min-width:260px;
+    }
+    .popup-success { border-left:6px solid #28a745; }
+    .popup-error { border-left:6px solid #dc3545; }
+  </style>
+
+</head>
+<body>
+
+  <div class="box">
+    <h2>Sign In</h2>
+
+    <form action="/signin" method="POST">
+      <label>Email:</label>
+      <input type="email" name="email" required>
+
+      <label>Password:</label>
+      <input type="password" name="password" required>
+
+      <button type="submit">Sign In</button>
+    </form>
+
+    <p>Don't have an account? <a href="/signup">Sign Up</a></p>
+  </div>
+
+  <!-- popup UI -->
+  <div id="popupOverlay" class="popup-overlay"></div>
+  <div id="popupBox" class="popup-box"></div>
+
+  <!-- hidden popup status from server -->
+  <input type="hidden" id="popupStatus" value="<%= popup %>">
+
+  <script>
+    function showPopup(message, type, redirectURL) {
+      const overlay = document.getElementById("popupOverlay");
+      const box = document.getElementById("popupBox");
+
+      box.innerHTML = message;
+      box.className = "popup-box " + (type === "success" ? "popup-success" : "popup-error");
+
+      overlay.style.display = "block";
+      box.style.display = "block";
+
+      setTimeout(() => {
+        overlay.style.display = "none";
+        box.style.display = "none";
+        if (redirectURL) window.location.href = redirectURL;
+      }, 2000);
+    }
+
+    // Read popup status
+    const popup = document.getElementById("popupStatus").value;
+
+    if (popup === "success") {
+      showPopup("✔ Signed in successfully!", "success", "/");
+    } else if (popup === "failed") {
+      showPopup("❌ Invalid email or password!", "error", null);
+    }
+  </script>
+
+</body>
+</html>

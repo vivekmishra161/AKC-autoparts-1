@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+  <title>Sign Up - AKC Auto Parts</title>
+
+  <style>
+    body {
+      font-family: 'Nunito Sans';
+      background: #f3f4f6;
+      margin: 0;
+      padding: 40px;
+      display: flex;
+      justify-content: center;
+    }
+
+    .box {
+      background: #fff;
+      padding: 28px 32px;
+      border-radius: 12px;
+      width: 380px;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+    }
+
+    h2 {
+      margin-top: 0;
+      text-align: center;
+      color: #111827;
+    }
+
+    label {
+      display: block;
+      margin-top: 12px;
+      font-weight: 600;
+      color: #374151;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      margin-top: 6px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      font-size: 15px;
+      box-sizing: border-box;
+    }
+
+    button {
+      width: 100%;
+      margin-top: 20px;
+      padding: 12px;
+      font-size: 16px;
+      background: #0d6efd;
+      border: none;
+      color: white;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    button:hover {
+      background: #0a58ca;
+    }
+
+    p {
+      margin-top: 18px;
+      text-align: center;
+      color: #374151;
+    }
+
+    a {
+      color: #0d6efd;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    /* popup overlay */
+    .popup-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.45);
+      display: none;
+      z-index: 99;
+    }
+
+    /* popup box */
+    .popup-box {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      padding: 24px 36px;
+      border-radius: 12px;
+      box-shadow: 0 0 18px rgba(0,0,0,0.3);
+      display: none;
+      z-index: 100;
+      min-width: 280px;
+      text-align: center;
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .popup-success { border-left: 6px solid #28a745; }
+    .popup-error   { border-left: 6px solid #dc3545; }
+
+  </style>
+</head>
+
+<body>
+
+  <div class="box">
+    <h2>Create Account</h2>
+
+    <form action="/signup" method="POST">
+
+      <label>Name:</label>
+      <input type="text" name="name" required>
+
+      <label>Email:</label>
+      <input type="email" name="email" required>
+
+      <label>Password:</label>
+      <input type="password" name="password" required>
+
+      <button type="submit">Create Account</button>
+
+    </form>
+
+    <p>Already have an account? <a href="/signin">Sign In</a></p>
+  </div>
+
+  <!-- popup components -->
+  <div id="popupOverlay" class="popup-overlay"></div>
+  <div id="popupBox" class="popup-box"></div>
+
+  <!-- hidden popup message (sent by server) -->
+  <input type="hidden" id="popupStatus" value="<%= popup %>">
+
+  <script>
+    // popup function (fade + 2 sec + redirect)
+    function showPopup(message, type, redirectURL) {
+      const overlay = document.getElementById("popupOverlay");
+      const box = document.getElementById("popupBox");
+
+      box.innerHTML = message;
+      box.className = "popup-box " + (type === "success" ? "popup-success" : "popup-error");
+
+      overlay.style.display = "block";
+      box.style.display = "block";
+
+      setTimeout(() => {
+        overlay.style.display = "none";
+        box.style.display = "none";
+
+        if (redirectURL) window.location.href = redirectURL;
+      }, 2000);
+    }
+
+    // read popup status from server
+    const popup = document.getElementById("popupStatus").value;
+
+    if (popup === "success") {
+      showPopup("✔ Account created successfully!", "success", "/signin");
+    }
+
+    if (popup === "exists") {
+      showPopup("⚠️ Email already exists!", "error", null);
+    }
+  </script>
+
+</body>
+</html>

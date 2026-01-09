@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Admin Orders</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    body{
+      margin:0;
+      font-family:'Nunito Sans',sans-serif;
+      background:#f3f4f6;
+    }
+
+    .main{
+      margin-left:260px;
+      padding:32px;
+    }
+
+    /* BRAND */
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      margin-bottom:30px;
+    }
+
+    .brand img{
+      width:40px;
+      height:40px;
+      border-radius:10px;
+      background:#fff;
+      padding:4px;
+    }
+
+    .brand span{
+      font-size:20px;
+      font-weight:700;
+    }
+
+    h1{
+      margin-bottom:20px;
+    }
+
+    table{
+      width:100%;
+      background:#fff;
+      border-radius:16px;
+      box-shadow:0 15px 35px rgba(0,0,0,.08);
+      border-collapse:collapse;
+      overflow:hidden;
+    }
+
+    th,td{
+      padding:16px;
+      text-align:left;
+    }
+
+    th{
+      background:#111827;
+      color:#fff;
+      font-weight:700;
+    }
+
+    tr:hover{
+      background:#f9fafb;
+    }
+
+    select{
+      padding:6px 12px;
+      border-radius:8px;
+      border:1px solid #d1d5db;
+      font-weight:600;
+      cursor:pointer;
+    }
+
+    .Pending{color:#92400e}
+    .Packed{color:#1d4ed8}
+    .Delivered{color:#065f46}
+    .Cancelled{color:#991b1b}
+  </style>
+</head>
+
+<body>
+
+<div class="main">
+
+  <!-- BRAND -->
+  <div class="brand">
+    <img src="https://th.bing.com/th/id/R.35647c0cec927537fa43ed1836a446c2?rik=7Lzu71WwPczowA&riu=http%3a%2f%2fpluspng.com%2fimg-png%2fhyundai-logo-png-hyundai-car-logo-png-brand-image-1749.png&ehk=UI8O%2bS7ci5lpalKI9Rf1u%2bMYvCgw%2bVwAeupMAcxmk2g%3d&risl=&pid=ImgRaw&r=0">
+    <span>AKC ADMIN</span>
+  </div>
+
+  <h1>Orders</h1>
+
+  <table>
+    <tr>
+      <th>Customer</th>
+      <th>Total</th>
+      <th>Status</th>
+      <th>Date</th>
+    </tr>
+
+    <% orders.forEach(o => { %>
+      <tr>
+        <td><%= o.customerName %></td>
+        <td>₹ <%= o.totalPrice %></td>
+
+        <td>
+        <select onchange="updateStatus('<%= o._id %>', this.value)" class="<%= o.status %>">
+  <option value="Pending" <%= o.status === "Pending" ? "selected" : "" %>>Pending</option>
+  <option value="Packed" <%= o.status === "Packed" ? "selected" : "" %>>Packed</option>
+  <option value="Delivered" <%= o.status === "Delivered" ? "selected" : "" %>>Delivered</option>
+  <option value="Cancelled" <%= o.status === "Cancelled" ? "selected" : "" %>>Cancelled</option>
+</select>
+
+        </td>
+
+        <td><%= new Date(o.createdAt).toDateString() %></td>
+      </tr>
+    <% }) %>
+  </table>
+
+</div>
+
+<script>
+function updateStatus(orderId, status){
+  fetch("/admin/update-order-status",{
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body: JSON.stringify({ orderId, status })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if(data.success){
+      location.reload();
+    }
+  });
+}
+</script>
+
+</body>
+</html>

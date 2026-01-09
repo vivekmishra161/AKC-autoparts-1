@@ -1,0 +1,997 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+  <title>Product — AKC Auto Parts</title>
+
+  <style>
+    :root{
+      --bg:#b2e6f3;
+      --card:#ffffff;
+      --muted:#6b7280;
+      --accent:#0f1724; /* neutral dark for premium look */
+      --accent-2:#ea580c; /* highlight */
+      --success:#16a34a;
+      --glass: rgba(255,255,255,0.6);
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:  'Nunito Sans', Times, serif;
+      background:var(--bg);
+      color:var(--accent);
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      padding:20px;
+    }
+
+    .container{max-width:1150px; margin:0 auto; display:grid; grid-template-columns: 1fr 420px; gap:28px; align-items:start;}
+    @media(max-width:980px){ .container{ grid-template-columns: 1fr; padding:8px } }
+
+    /* left (images + gallery + description) */
+    .media {
+      background:transparent;
+      display:flex; flex-direction:column; gap:14px;
+    }
+    .hero {
+      background:#3e7987;
+      border-radius:12px;
+      padding:0px;
+      box-shadow:0 8px 30px rgba(15,23,42,0.06);
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      min-height:300px;
+      position:relative;
+      overflow:hidden;
+    }
+    .hero img{
+      max-width:100%;
+      max-height:550px;
+      object-fit:contain;
+      transition:transform .25s ease;
+      cursor:zoom-in;
+    }
+    /* zoom on hover */
+    .hero:hover img{ transform:scale(1.06); }
+
+    .thumbs {
+      display:flex; gap:8px; margin-top:6px; flex-wrap:wrap;
+    }
+    .thumbs button{
+      width:72px; height:56px; border-radius:8px; border:1px solid #e6e9ef; background:#fff;
+      display:inline-flex; align-items:center; justify-content:center; padding:4px; cursor:pointer;
+    }
+    .thumbs img{ width:100%; height:100%; object-fit:cover; border-radius:6px; }
+
+    /* right (meta & actions) */
+    .meta {
+      background:var(--card);
+      border-radius:12px;
+      padding:20px;
+      box-shadow:0 8px 30px rgba(15,23,42,0.06);
+      display:flex; flex-direction:column; gap:12px;
+      height:fit-content;
+    }
+    .brand-row{ display:flex; gap:10px; align-items:center; }
+    .brand-row img{ height:34px; width:auto; border-radius:6px; object-fit:contain; }
+    .title{ font-size:22px; font-weight:700; margin:0; letter-spacing:0.2px; color:var(--accent); }
+    .subline{ color:var(--muted); font-size:14px; }
+
+    .price-row{ display:flex; gap:12px; align-items:center; margin-top:6px; }
+    .price{ font-size:26px; font-weight:800; color:var(--accent-2); }
+    .old-price{ text-decoration:line-through; color:var(--muted); font-size:14px; }
+    .stock{ padding:6px 10px; border-radius:999px; font-weight:700; font-size:13px; color:#fff; background:var(--success); }
+
+    .rating { display:flex; gap:8px; align-items:center; }
+    .stars { display:flex; gap:4px; }
+    .star{ font-size:18px; color:#f59e0b; cursor:pointer; opacity:0.95; }
+
+    .qty-row{ display:flex; gap:10px; align-items:center; margin-top:12px; }
+    .qty { display:flex; gap:8px; align-items:center; border-radius:8px; overflow:hidden; border:1px solid #e6e9ef; }
+    .qty button{ background:#fff; border:0; padding:10px 12px; cursor:pointer; font-weight:700; }
+    .qty input{ width:56px; text-align:center; border:0; padding:8px; font-size:15px; }
+
+    .cta { display:flex; gap:10px; margin-top:12px; }
+    .btn { padding:12px 16px; border-radius:10px; cursor:pointer; border:0; font-weight:700; }
+    .btn.cart{ background:var(--accent-2); color:#eae6e6; }
+    .btn.full{ flex:1; }
+
+    .meta small{ color:var(--muted) }
+
+    /* description & specs */
+    .details { margin-top:18px; background:var(--card); padding:18px; border-radius:12px; box-shadow:0 6px 18px rgba(2,6,23,0.03) }
+    .details h4{ margin:0 0 8px 0; font-size:16px; }
+    .specs{ width:100%; border-collapse:collapse; margin-top:8px; }
+    .specs td{ padding:8px 10px; border-top:1px dashed #eef2f6; font-size:14px; color:var(--muted) }
+
+    /* related */
+    .related { margin-top:16px; display:flex; gap:10px; overflow:auto; padding-bottom:6px; }
+    .rel-card{ min-width:170px; background:var(--card); padding:10px; border-radius:10px; box-shadow:0 6px 18px rgba(2,6,23,0.03); display:flex; flex-direction:column; gap:8px; align-items:center; }
+    .rel-card img{ width:140px; height:90px; object-fit:cover; border-radius:8px; }
+
+    /* messages */
+   /* CENTER POPUP: Added to Cart */
+#toast {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.8);
+  padding: 16px 22px;
+  background: #111827;  /* dark background */
+  color: #fff;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 600;
+  z-index: 9999;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.35s ease, transform 0.35s ease;
+}
+
+#toast.show {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+/* ================================
+   CUSTOMER REVIEW SECTION STYLING
+   ================================= */
+
+/* Section wrapper */
+.review-section {
+  margin-top: 40px;
+  padding: 25px;
+  background: var(--card);
+  border-radius: 14px;
+  box-shadow: 0 8px 30px rgba(15, 23, 42, 0.08);
+  border: 1px solid #e5e7eb;
+}
+
+/* Title */
+.review-section h3 {
+  margin: 0 0 15px 0;
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--accent);
+}
+
+/* Review form textarea */
+.review-textarea {
+  width: 100%;
+  height: 90px;
+  padding: 12px;
+  font-size: 15px;
+  border-radius: 10px;
+  border: 1px solid #d1d5db;
+  background: #fafafa;
+  transition: 0.25s ease;
+  resize: none;
+}
+
+.review-textarea:focus {
+  outline: none;
+  background: #fff;
+  border-color: var(--accent-2);
+  box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.15);
+}
+
+/* Submit button */
+.review-submit-btn {
+  padding: 10px 18px;
+  border-radius: 10px;
+  background: var(--accent-2);
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  font-weight: 700;
+  transition: 0.3s ease;
+}
+
+.review-submit-btn:hover {
+  background: #c2410c;
+  transform: translateY(-2px);
+}
+
+/* Review Cards */
+.review-card {
+  background: var(--card);
+  padding: 16px;
+  margin-bottom: 14px;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+  transition: 0.25s ease;
+}
+
+.review-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.10);
+}
+
+/* Username */
+.review-user {
+  font-weight: 700;
+  font-size: 16px;
+  color: var(--accent);
+}
+
+/* Review message text */
+.review-message {
+  margin: 6px 0 10px 0;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+/* Date */
+.review-date {
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+/* Review stars (displayed) */
+.review-stars {
+  color: #fbbf24;
+  font-size: 18px;
+  margin-bottom: 5px;
+}
+
+/* Rating dropdown */
+#reviewRating {
+  padding: 8px;
+  font-size: 14px;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+#reviewRating:hover {
+  border-color: var(--accent-2);
+}
+
+/* Interactive hover stars for input (if needed later) */
+.star-input {
+  font-size: 22px;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.star-input:hover {
+  transform: scale(1.2);
+  color: #fbbf24;
+}
+
+/* Popup styling */
+.popup-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+.popup-box {
+  background: #fff;
+  padding: 20px;
+  width: 350px;
+  border-radius: 12px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+  text-align: center;
+}
+
+.popup-box textarea {
+  width: 100%;
+  height: 80px;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+.popup-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.btn.secondary {
+  background: #e5e7eb;
+  color: #111;
+}
+.delivery-box {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  padding: 10px 14px;
+  border-radius: 12px;
+  margin-top: 4px;
+}
+
+.free-delivery {
+  margin: 0;
+  font-weight: 700;
+  color: #166534;
+}
+
+.delivery-date {
+  margin: 0;
+  color: #065f46;
+  font-size: 14px;
+}
+.glass-header {
+  width: 100%;
+  max-width: 1150px;
+  margin: 0 auto 22px;
+  padding: 12px 20px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  background: rgba(255, 255, 255, 0.45);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+
+  box-shadow: 0 8px 28px rgba(0,0,0,0.12);
+}
+
+.header-logo {
+  height: 44px;
+  border-radius: 8px;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.brand-title {
+  font-size: 20px;
+  font-weight: 800;
+  align-items: center;
+}
+
+.header-right {
+  font-size: 14px;
+  color: #4b5563;
+}
+
+    /* sign-in prompt (center modal) */
+    .modal-overlay{ position:fixed; inset:0; background:rgba(0,0,0,0.45); display:none; align-items:center; justify-content:center; z-index:9998; }
+    .modal{ background:#fff; padding:22px; border-radius:12px; width:360px; box-shadow:0 10px 30px rgba(2,6,23,0.2); text-align:center; }
+    .modal h3{ margin:0 0 10px 0; }
+    .modal .actions{ display:flex; gap:10px; margin-top:14px; justify-content:center; }
+    .dot-indicators{display:flex; gap:8px; justify-content:center; margin-top:12px;}
+    .dot{ width:10px; height:10px; border-radius:999px; background:#e6e9ef; cursor:pointer; transition:transform .15s ease, background .15s ease;}
+    .dot.active{ background:var(--accent-2); transform:scale(1.15); box-shadow:0 4px 10px rgba(234,88,12,0.18);}
+  </style>
+</head>
+<body>
+
+<header class="glass-header">
+  <div class="header-left">
+    <img src="https://th.bing.com/th/id/R.35647c0cec927537fa43ed1836a446c2?rik=7Lzu71WwPczowA&riu=http%3a%2f%2fpluspng.com%2fimg-png%2fhyundai-logo-png-hyundai-car-logo-png-brand-image-1749.png&ehk=UI8O%2bS7ci5lpalKI9Rf1u%2bMYvCgw%2bVwAeupMAcxmk2g%3d&risl=&pid=ImgRaw&r=0" class="header-logo">
+    <span class="brand-title">AKC AUTO PARTS</span>
+  </div>
+
+  <div class="header-center"></div>
+
+  <div class="header-right">
+    <span>Parts for Hyundai • Tata • Bajaj</span>
+  </div>
+</header>
+
+
+<main class="container">
+
+  <!-- LEFT: media + details -->
+  <section class="media">
+    <div class="hero" id="heroWrap">
+      <img id="heroImg" src="https://via.placeholder.com/600x420?text=Loading..." alt="Product image">
+    </div>
+
+    <div class="thumbs" id="thumbs"></div>
+
+    <div class="details" id="descBlock">
+      <h4>Product description</h4>
+      <div id="prodDescription" style="color:var(--muted); line-height:1.5;">
+        Loading description...
+      </div>
+
+      <h4 style="margin-top:12px">Specifications</h4>
+      <table class="specs" id="specTable">
+        <!-- rows populated by JS -->
+      </table>
+    </div>
+  </section>
+
+  <!-- RIGHT: meta & actions -->
+  <aside class="meta">
+    <div class="brand-row">
+      <img id="brandLogo" src="https://static.vecteezy.com/system/resources/previews/015/482/738/original/akc-letter-logo-design-on-white-background-akc-creative-initials-circle-logo-concept-akc-letter-design-vector.jpg" alt="Brand" />
+      <div style="display:flex;flex-direction:column;">
+        <div class="subline" id="manufacturer">Manufacturer</div>
+        <div style="font-size:13px;color:var(--muted)" id="prodId">ID</div>
+      </div>
+    </div>
+
+    <h1 class="title" id="prodTitle">Product Title</h1>
+    <div class="price-row">
+      <div>
+        <div class="price" id="prodPrice">₹0</div>
+        <div class="old-price" id="prodOldPrice"></div>
+      </div>
+      <div style="margin-left:auto">
+        <div class="stock" id="stockBadge">In stock</div>
+      </div>
+    </div>
+    <div class="delivery-box">
+  <p class="free-delivery">🚚 Free Delivery Available</p>
+  <p class="delivery-date">Delivery by: <span id="etaDate"></span></p>
+</div>
+
+
+    <div class="rating">
+      <div class="stars" id="stars">
+        <!-- interactive stars -->
+      </div>
+      <small id="ratingText" style="color:var(--muted)">4.6 • 132 reviews</small>
+    </div>
+
+    <div class="qty-row">
+      <div style="color:var(--muted); font-size:14px">Quantity</div>
+      <div class="qty" style="margin-left:8px">
+        <button type="button" onclick="decreaseQty()">−</button>
+        <input id="qtyInput" type="number" value="1" min="1" />
+        <button type="button" onclick="increaseQty()">+</button>
+      </div>
+    </div>
+
+    <div class="cta">
+      <button class="btn cart" id="addCartBtn">Add to Cart</button>
+    </div>
+
+    <div style="display:flex; gap:10px; margin-top:8px; align-items:center;">
+      <button class="btn" style="background:transparent; border:1px dashed #e6e9ef; padding:8px 10px" id="backBtn">← Back to shop</button>
+      <div style="margin-left:auto; color:var(--muted); font-size:13px">Share:
+        <a href="#" id="shareFb" style="margin-left:8px; text-decoration:none">FB</a>
+        <a href="#" id="shareTw" style="margin-left:6px; text-decoration:none">TW</a>
+      </div>
+    </div>
+
+    <div class="related" id="related"></div>
+
+  </aside>
+</main>
+
+<!-- toast -->
+<div id="toast" class="toast">Added to cart</div>
+
+
+<!-- sign-in modal -->
+<div id="signModal" class="modal-overlay">
+  <div class="modal">
+    <h3>Sign in required</h3>
+    <p>You need to sign in before buying. Would you like to sign in now?</p>
+    <div class="actions">
+      <button class="btn cart" onclick="closeModal()">No, stay</button>
+      <button class="btn buy" onclick="goSignin()">Yes, take me to sign in</button>
+    </div>
+  </div>
+</div>
+<div class="details" style="margin-top:20px;">
+  <h4>Customer Reviews</h4>
+
+  <!-- Review Form -->
+  <% if (session && session.user) { %>
+    <div style="margin-bottom:15px;">
+      <textarea id="reviewMessage" placeholder="Write your review..." style="width:100%;height:70px;padding:10px;border-radius:8px;border:1px solid #ccc;"></textarea>
+      
+      <div style="margin-top:8px;">
+        Rating:
+        <select id="reviewRating">
+          <option value="5">⭐⭐⭐⭐⭐</option>
+          <option value="4">⭐⭐⭐⭐</option>
+          <option value="3">⭐⭐⭐</option>
+          <option value="2">⭐⭐</option>
+          <option value="1">⭐</option>
+        </select>
+
+        <button class="btn buy" onclick="submitReview()" style="margin-left:10px;">Submit</button>
+      </div>
+    </div>
+  <% } else { %>
+    <p style="color:#666">Please <a href="/signin">sign in</a> to write a review.</p>
+  <% } %>
+
+  <!-- Reviews List -->
+  <div id="reviewList" style="margin-top:15px;">
+
+  </div>
+</div>
+
+<script>
+/* =========================
+   Product view page script
+   ========================= */
+
+const LS_CART_KEY = 'akc_cart_v1';
+
+/* (1) — Product data (same arrays as your shop page).
+   Keep it in sync with your other pages; used locally here. */
+const products = [];
+function createPart(manufacturer, name, cat, baseId, price){
+  const categoryImages = {
+    Engine: "https://di-uploads-pod14.dealerinspire.com/toyotaoforlando/uploads/2021/02/car-engine.jpg",
+    Brake: "https://www.gotodobbs.com/wp-content/uploads/2016/08/disc-brake-and-pads-on-a-vehicle.jpg",
+    Electrical: "https://easycarelectrics.com/wp-content/uploads/2021/12/Car-Electrical-System-Wiring.jpg",
+    Suspension: "https://di-uploads-pod16.dealerinspire.com/toyotaofnorthcharlotte/uploads/2020/03/N-Charlotte-car-suspension-system.jpg",
+    Body: "https://png.pngtree.com/thumb_back/fh260/background/20230929/pngtree-an-auto-car-is-displayed-with-its-assembly-line-attached-image_13343909.jpg",
+    Cooling: "https://upgradedvehicle.com/wp-content/uploads/2023/08/Basics-of-a-Car-Cooling-System.jpg",
+    Exhaust: "https://as2.ftcdn.net/v2/jpg/09/28/95/83/1000_F_928958372_sgcGDtOWJiACPZ3z2xtgO4yHsWd3NpU1.jpg",
+    Fuel: "https://www.rd.com/wp-content/uploads/2017/03/04-Why-Do-Cars-Have-Gas-Tanks-on-the-Left-or-Right-_128298575-welcomia-ft.jpg",
+    Glass: "https://tse1.mm.bing.net/th/id/OIP.mstA0tgCwz1Q5DCbRhtF0gHaE7?w=630&h=419&rs=1&pid=ImgDetMain&o=7&rm=3",
+    Wiper: "https://tse3.mm.bing.net/th/id/OIP.XJ0E_z839j7xY73WuHgHIgHaEo?w=1200&h=750&rs=1&pid=ImgDetMain&o=7&rm=3",
+    Interior: "https://tse1.mm.bing.net/th/id/OIP.QIkxkXghoTkCGxABO-gHkAHaDL?w=1200&h=515&rs=1&pid=ImgDetMain&o=7&rm=3"
+  };
+
+  const img =
+    categoryImages[cat] ||
+    `https://via.placeholder.com/600x420?text=${encodeURIComponent(name)}`;
+
+  return {
+    manufacturer,
+    name,
+    category: cat,
+    id: baseId,
+    price,
+    img,
+    description: `Genuine ${manufacturer} ${name}. High quality spare part.`,
+    specs: {
+      Category: cat,
+      Condition: "New",
+      Warranty: "6 months",
+      Compatibility: manufacturer
+    }
+  };
+}
+
+const hy = [
+  ["737000B010", "PANEL ASSY-TAIL GATE", "Body", 12935.28],
+  ["8611025100", "GLASS-WINDSHIELD", "Glass", 7203.5],
+  ["2461022600", "ADJUSTER ASSY-ROCKER ARM LASH", "Engine", 5287.8],
+  ["715221A000", "PANEL-REAR SIDE OUTER,RH", "Body", 4959.24],
+  ["287001A200", "PIPE-TAIL W/MUFFLER", "Exhaust", 4843.02],
+  ["8661025000", "COVER ASSY-RR BUMPER", "Body", 4068.42],
+  ["253101A000", "RADIATOR ASSY", "Cooling", 3452.52],
+  ["8661105000", "COVER-RR BUMPER", "Body", 3285.0],
+  ["6640025000", "PANEL ASSY-HOOD", "Body", 3204.67],
+  ["865101A000", "COVER ASSY-FR BUMPER", "Body", 3051.6],
+  ["866110B000", "COVER-RR BUMPER", "Body", 2601.24],
+  ["583051AA00", "SHOE & LINING KIT-RR BRAKE", "Brake", 2312.0],
+  ["2191025010", "BRACKET ASSY-ROLL STOPPER,FR", "Suspension", 2293.93],
+  ["663111A000", "PANEL-FENDER,LH", "Body", 2061.74],
+  ["663211A000", "PANEL-FENDER,RH", "Body", 2061.74],
+  ["2431227000", "BELT-VALVE TIMING", "Engine", 2045.07],
+  ["8651105000", "COVER-FR BUMPER", "Body", 1973.66],
+  ["3517022600", "SENSOR ASSY-THROTTLE POSITION", "Engine", 1963.47],
+  ["8711005541", "GLASS-TAIL GATE", "Glass", 1946.87],
+  ["6450105060", "PANEL ASSY-FNDR APRON,LH", "Body", 1913.88],
+  ["8661105600", "COVER-RR BUMPER", "Body", 1805.06],
+  ["8711005551", "GLASS-TAIL GATE", "Glass", 1777.89],
+  ["9725925100", "SWITCH ASSY-A/C", "Electrical", 1704.24],
+  ["5775525000", "BALL JOINT ASSY,INR", "Suspension", 1687.92],
+  ["8636005600", "GRILLE ASSY-RADIATOR", "Body", 1564.37],
+  ["8772225510CA", "MOULDING ASSY-FRT DR W/LINE,RH", "Body", 1240.86],
+  ["5483017010", "LINK ASSY-FRONT STABILIZER,LH", "Suspension", 1096.92],
+  ["5483017020", "LINK ASSY-FRONT STABILIZER,RH", "Suspension", 1096.92],
+  ["3198143000", "CARTRIDGE & SENSOR ASSY", "Engine", 976.83],
+  ["8772225000CA", "MOULDING ASSY-FRT DR W/LINE,RH", "Body", 965.73],
+  ["865811A000", "BRACKET-FR BPR UPR SUPT", "Body", 931.77],
+  ["5450325A00", "BALL JOINT KIT-SUSP LWR ARM", "Suspension", 889.58],
+  ["5810225A00", "SEAL KIT-FR DISC BRAKE", "Brake", 844.72],
+  ["529601V000", "CAP ASSY-WHEEL HUB", "Body", 809.98],
+  ["876101J700", "MIRROR ASSY-OUTSIDE RR VIEW,LH", "Body", 809.65],
+  ["8773225000CA", "MOULDING ASSY-RR DR W/LINE,RH", "Body", 794.87],
+  ["5583025000", "LINK-STABILIZER BAR", "Suspension", 783.02],
+  ["876101A901CA", "MIRROR ASSY-O/S REAR VIEW,LH", "Body", 780.94],
+  ["597701V000", "CABLE ASSY-PARKING BRAKE,RH", "Brake", 757.31],
+  ["9241025000", "LENS & HSG-REAR COMB LAMP,LH", "Electrical", 628.53],
+  ["863201C000", "EMBLEM-GETZ", "Body", 595.34],
+  ["8632305100", "EMBLEM-1.1 L", "Body", 584.98],
+  ["8773125510CA", "MOULDING ASSY-RR DR W/LINE,LH", "Body", 560.61],
+  ["8636105101", "GRILLE-RADIATOR", "Body", 521.28],
+  ["838301R000", "MOULDING ASSY-RR DR DELTA,LH", "Body", 514.69],
+  ["838401R000", "MOULDING ASSY-RR DR DELTA,RH", "Body", 514.69],
+  ["8761125100", "MIRROR & HOLDER ASSY-O/S RR VI", "Body", 511.35],
+  ["8762125400", "MIRROR & HOLDER-OUTSIDE RR,RH", "Body", 511.35],
+  ["8240305510", "REGULATOR ASSY-FR DR P/WDO LH", "Electrical", 510.23],
+  ["9241002200", "SWITCH ASSY-FR FOG LAMP", "Electrical", 509.07],
+  ["5531122000", "INSULATOR-STRUT", "Suspension", 501.17],
+  ["8612128A00", "DAM-GLASS", "Glass", 457.45],
+  ["5481325000", "BUSH-STABILIZER BAR", "Suspension", 448.3],
+  ["8641036010", "BUMPER-HOOD OVERSLAM", "Body", 430.95],
+  ["6951005500", "DOOR ASSY-FUEL FILLER", "Fuel", 424.72],
+  ["817201J020", "HANDLE ASSY-TAIL GATE", "Body", 422.27],
+  ["565550X500", "RACK BUSH", "Suspension", 408.64],
+  ["8340305510", "REGULATOR ASSY-RR DR P/WDO LH", "Electrical", 360.44],
+  ["815114A000", "BUMPER-F/FILLER DR O/SLAM", "Body", 339.04],
+  ["5461202000", "BEARING-STRUT", "Suspension", 325.53],
+  ["876210P970", "MIRROR & HOLDER-OUTSIDE RR,RH", "Body", 323.16],
+  ["876110B000", "MIRROR & HOLDER ASSY-O/S RR VI", "Body", 320.51],
+  ["876210B000", "MIRROR & HOLDER-OUTSIDE RR,RH", "Body", 320.51],
+  ["5830105A00", "CYLINDER KIT-RR WHEEL BRAKE", "Brake", 316.9],
+  ["865821A000", "BRACKET-FR BPR LWR SUPT", "Body", 310.59],
+  ["8683102000", "GUARD ASSY-FRONT WHEEL MUD,LH", "Body", 309.7],
+  ["8683202000", "GUARD ASSY-FRONT WHEEL MUD,RH", "Body", 309.7],
+  ["3341202000", "RELIEF DIAPH", "Engine", 304.92],
+  ["5723122000", "BELT V-POWER STEERING PUMP", "Engine", 300.54],
+  ["865841A000", "BRACKET-FR BPR CORNER SUPT,LH", "Body", 299.04],
+  ["865851A000", "BRACKET-FR BPR CORNER SUPT,RH", "Body", 299.04],
+  ["529601C300", "CAP ASSY-WHEEL HUB", "Body", 298.45],
+  ["988201C000", "BLADE ASSY-WIPER,RR", "Wiper", 284.86],
+  ["8265025000CA", "HANDLE ASSY-FRONT DOOR OUTSIDE", "Body", 265.65],
+  ["8266025000CA", "HANDLE ASSY-FRONT DOOR OUTSIDE", "Body", 265.65],
+  ["9882105000", "BLADE-W/SHLD WIPER", "Wiper", 254.1],
+  ["254121E300", "HOSE-RADIATOR LOWER", "Cooling", 232.85],
+  ["8365025000CA", "HANDLE ASSY-REAR DOOR OUTSIDE", "Body", 232.45],
+  ["8366025000CA", "HANDLE ASSY-REAR DOOR OUTSIDE", "Body", 232.45],
+  ["9183038000", "LP-S/B FUSE 30A", "Electrical", 230.65],
+  ["2915025000", "COVER-UNDER", "Body", 196.18],
+  ["5810202A00", "SEAL KIT-FR DISC BRAKE", "Brake", 183.99],
+  ["8651605000", "MESH-FRONT BUMPER,LH", "Body", 183.85],
+  ["815900X900", "CATCH & CABLE ASSY-FUEL FILLER", "Fuel", 182.16],
+  ["923300B010", "LENS & HOUSING ASSY-S/RPTR", "Electrical", 177.04],
+  ["5296022800", "CAP ASSY-WHEEL HUB", "Body", 163.64],
+  ["868111A000", "GUARD ASSY-FRONT WHEEL,LH", "Body", 161.82],
+  ["868121A000", "GUARD ASSY-FRONT WHEEL,RH", "Body", 161.82],
+  ["8651505000", "BRACKET-FR BUMPER SIDE UPR,RH", "Body", 150.78],
+  ["8651705000", "MESH-FRONT BUMPER,RH", "Body", 147.08],
+  ["8644002001", "W/STRIP-HOOD", "Body", 120.81],
+  ["8636205100", "MESH-RADIATOR GRILLE", "Body", 112.88],
+  ["8263022001LM", "HANDLE ASSY-DOOR WINDOW REGULA", "Interior", 106.23],
+  ["8659334000", "GROMMET-SCREW", "Body", 99.9],
+  ["865831A000", "BRACKET-FR BPR CTR SUPT", "Body", 99.85],
+  ["865241V000", "COVER-BLANKING FRT FOG,RH", "Body", 86.2],
+  ["8684205500", "GUARD ASSY-REAR WHEEL MUD,RH", "Body", 71.94],
+  ["711170U000", "BRACKET ASSY-FENDER MTG,LH", "Body", 64.85],
+  ["711270U000", "BRACKET ASSY-FENDER MTG,RH", "Body", 64.85],
+  ["8766025010", "COVER-FR DR QUADRANT INR LH", "Body", 60.7],
+  ["9863025900", "NOZZLE ASSY-WINDSHIELD WASHER", "Wiper", 58.38],
+  ["8939114001IJ", "KNOB-LATCH ROD", "Interior", 57.68],
+  ["8661505600", "BRACKET-RR BUMPER SIDE,LH", "Body", 55.26],
+  ["8661605600", "BRACKET-RR BUMPER SIDE,RH", "Body", 55.26],
+  ["8683225000", "GUARD ASSY-FRONT WHEEL MUD,RH", "Body", 51.94],
+  ["8135533000", "SHIM-DR STRIKER", "Interior", 38.06],
+  ["9835205000", "CAP-W/WPR ARM", "Wiper", 35.97],
+  ["1893720252", "FUSE-AUTO 20(A)", "Electrical", 29.58]
+];
+hy.forEach(it => {
+  products.push(
+    createPart(
+      "Hyundai",
+      it[1], // name
+      it[2], // category
+      it[0], // id
+      it[3]  // price
+    )
+  );
+});
+const ta = [
+  ["Diesel Engine","Engine", 8000],["Heavy Brake Shoe","Brake", 2600],["Hydraulic Pump","Engine", 7000],["Axle Shaft","Body", 5400],["Gearbox","Engine", 9000],
+  ["Turbocharger","Engine", 9500],["Fuel Injector","Engine", 4800],["Transmission Assembly","Engine", 15000],["Leaf Spring","Suspension", 4200],["Wheel Hub","Body", 3100],
+  ["Radiator Tank","Engine", 6000],["AC Blower","Electrical", 2800],["Diesel Filter","Engine", 1300],["Heavy Tyre","Body", 5500],["Clutch Booster","Engine", 4300],
+  ["Propeller Shaft","Engine", 7200],["Starter Motor","Electrical", 3900],["Alternator Heavy","Electrical", 5800],["Steering Column","Body", 3600],["Air Drum","Body", 2700]
+];
+ta.forEach((it,i)=> products.push(createPart("Tata", it[0], it[1], `TA${200+i}`, it[2])));
+
+const bj = [
+  ["Bike Engine","Engine", 6000],["Front Brake","Brake", 900],["Rear Brake","Brake", 850],["Silencer","Body", 2000],["Bike Chain","Body", 1200],
+  ["Carburetor","Engine", 1800],["Fuel Tank","Body", 2500],["Headlamp","Electrical", 950],["Backlight","Electrical", 650],["Shock Absorber","Suspension", 1900],
+  ["Meter Console","Electrical", 2100],["Battery","Electrical", 2200],["Air Filter","Engine", 450],["Clutch Wire","Engine", 300],["Throttle Body","Engine", 2600],
+  ["Piston Kit","Engine", 2800],["Brake Lever","Brake", 450],["Indicator Light","Electrical", 220],["Alloy Wheel","Body", 3200],["Bike Seat","Body", 1500]
+];
+bj.forEach((it,i)=> products.push(createPart("Bajaj", it[0], it[1], `BJ${300+i}`, it[2])));
+
+/* helpers */
+function qs(name){ return new URLSearchParams(location.search).get(name); }
+function numberWithCommas(x){ return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","); }
+function loadCart(){ try{ return JSON.parse(localStorage.getItem(LS_CART_KEY)) || []; }catch(e){ return []; } }
+function saveCart(c){ localStorage.setItem(LS_CART_KEY, JSON.stringify(c)); showToast('Cart updated'); updateCartCount(); }
+function updateCartCount(){ /* if you have a global badge, update here */ }
+
+/* is user signed in? provided by server */
+const isLoggedIn = "<%= session && session.user ? 'true' : 'false' %>";
+
+
+/* Render product from query param */
+const productId = qs('id') || ''; // expects /product?id=HY100
+const product = products.find(p => p.id === productId) || null;
+
+if (!product) {
+  document.body.innerHTML = '<div style="max-width:900px;margin:40px auto;padding:18px;background:#fff;border-radius:12px;text-align:center">Product not found — <a href="/">Back to shop</a></div>';
+} else {
+  // Populate UI
+  const heroImg = document.getElementById('heroImg');
+  const thumbs = document.getElementById('thumbs');
+  const prodTitle = document.getElementById('prodTitle');
+  const manufacturer = document.getElementById('manufacturer');
+  const prodIdEl = document.getElementById('prodId');
+  const prodPrice = document.getElementById('prodPrice');
+  const prodOldPrice = document.getElementById('prodOldPrice');
+  const stockBadge = document.getElementById('stockBadge');
+  const prodDescription = document.getElementById('prodDescription');
+  const specTable = document.getElementById('specTable');
+  const related = document.getElementById('related');
+
+  // main hero
+  heroImg.src = product.img;
+  heroImg.alt = product.name;
+
+  // thumbs: we'll include up to 4 thumbnails (reusing product.img + category placeholders)
+  const thumbsList = [product.img];
+  // add a few category images for visual variety
+  thumbsList.push(product.img.replace('600x420', '400x300') || product.img);
+  thumbsList.push('https://via.placeholder.com/400x240?text=Spec+View');
+  thumbsList.push('https://via.placeholder.com/400x240?text=Close+up');
+
+  thumbsList.slice(0,4).forEach((src, i) => {
+    const btn = document.createElement('button');
+    const img = document.createElement('img');
+    img.src = src;
+    img.alt = product.name + ' thumb ' + (i+1);
+    btn.appendChild(img);
+    btn.addEventListener('click', ()=> {
+      heroImg.src = src;
+      // indicate active thumb
+      document.querySelectorAll('.thumbs button').forEach(b=>b.style.boxShadow='none');
+      btn.style.boxShadow = '0 6px 18px rgba(15,23,42,0.12)';
+    });
+    thumbs.appendChild(btn);
+  });
+
+  // meta
+  prodTitle.textContent = product.name;
+  manufacturer.textContent = product.manufacturer;
+  prodIdEl.textContent = product.id;
+  prodPrice.textContent = '₹' + numberWithCommas(product.price);
+  prodOldPrice.textContent = ''; // you can set product.oldPrice if available
+  prodDescription.textContent = product.description || '—';
+
+  // specs
+  specTable.innerHTML = '';
+  const specs = product.specs || {};
+  for (const k in specs){
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td style="width:40%;">${k}</td><td>${specs[k]}</td>`;
+    specTable.appendChild(tr);
+  }
+
+  // stock badge (demo logic)
+  const stockStatus = Math.random() > 0.12 ? 'In stock' : 'Limited';
+  stockBadge.textContent = stockStatus;
+  if (stockStatus === 'Limited') { stockBadge.style.background = '#f97316'; }
+
+  // stars (UI only)
+  const starsWrap = document.getElementById('stars');
+  const rating = 4.6; // can be dynamic
+  for (let i=1;i<=5;i++){
+    const sp = document.createElement('span');
+    sp.className = 'star';
+    sp.innerHTML = (i <= Math.round(rating) ? '★' : '☆');
+    sp.addEventListener('mouseenter', ()=> { /* optional hover */});
+    starsWrap.appendChild(sp);
+  }
+
+  // related (simple: same category)
+  const relatedList = products.filter(p => p.category === product.category && p.id !== product.id).slice(0,6);
+  relatedList.forEach(r => {
+    const c = document.createElement('div');
+    c.className = 'rel-card';
+    c.innerHTML = `<img src="${r.img}" alt="${r.name}"><div style="font-weight:700;font-size:14px;">${r.name}</div><div style="color:var(--muted);font-size:13px">${r.manufacturer}</div><button style="margin-top:8px;padding:8px 10px;border-radius:8px;border:1px solid #e6e9ef;background:#fff;cursor:pointer" onclick="location.href='/product?id=${r.id}'">View</button>`;
+    related.appendChild(c);
+  });
+
+  // Add event listeners for buttons
+  document.getElementById('backBtn').addEventListener('click', ()=> location.href = '/');
+  document.getElementById('addCartBtn').addEventListener('click', ()=> {
+    const qty = Math.max(1, Number(document.getElementById('qtyInput').value || 1));
+    addToCart(product.id, qty);
+  });
+  document.getElementById('buyNowBtn').addEventListener('click', ()=> {
+    if (isLoggedIn !== 'true') {
+      // show sign-in modal
+      document.getElementById('signModal').style.display = 'flex';
+      return;
+    }
+    // buy flow: add to cart and go to registration/checkout
+    const qty = Math.max(1, Number(document.getElementById('qtyInput').value || 1));
+    addToCart(product.id, qty);
+    location.href = '/registration';
+  });
+
+}
+
+/* qty helpers */
+function increaseQty(){ const el = document.getElementById('qtyInput'); el.value = Number(el.value || 1) + 1; }
+function decreaseQty(){ const el = document.getElementById('qtyInput'); el.value = Math.max(1, Number(el.value || 1) - 1); }
+
+/* add to cart */
+function addToCart(productId, qty){
+  let cart = loadCart();
+  qty = Number(qty) || 1;
+  const existing = cart.find(i=>i.id === productId);
+  if (existing) existing.qty += qty;
+  else cart.push({ id: productId, qty });
+  saveCart(cart);
+  showToast('Added to cart');
+}
+
+/* toast */
+function showToast(message) {
+  const toast = document.getElementById("toast");
+  toast.textContent = message;
+  toast.classList.add("show");
+
+  // Hide after 2 seconds
+  setTimeout(() => {
+    toast.classList.remove("show");
+  }, 2000);
+}
+
+
+/* sign modal */
+function closeModal(){ document.getElementById('signModal').style.display = 'none'; }
+function goSignin(){ location.href = '/signin'; }
+
+/* share links (basic) */
+document.getElementById('shareFb').addEventListener('click', (e)=> {
+  e.preventDefault();
+  const u = encodeURIComponent(location.href);
+  window.open(`https://www.facebook.com/sharer/sharer.php?u=${u}`, '_blank');
+});
+document.getElementById('shareTw').addEventListener('click', (e)=> {
+  e.preventDefault();
+  const u = encodeURIComponent(location.href); const t = encodeURIComponent(document.title);
+  window.open(`https://twitter.com/intent/tweet?url=${u}&text=${t}`, '_blank');
+});
+
+</script>
+<script>
+const productid = new URLSearchParams(location.search).get("id");
+
+
+function loadRating() {
+  fetch(`/rating/${productId}`)
+    .then(res => res.json())
+    .then(data => {
+      const avg = Number(data.avg);
+      const count = data.count;
+
+      const ratingText = document.getElementById("ratingText");
+      const starsWrap = document.getElementById("stars");
+
+      if (count === 0) {
+        ratingText.textContent = "No reviews yet";
+        starsWrap.innerHTML = "☆☆☆☆☆";
+        return;
+      }
+
+      ratingText.textContent = `${avg} • ${count} reviews`;
+
+      starsWrap.innerHTML =
+        "★".repeat(Math.round(avg)) +
+        "☆".repeat(5 - Math.round(avg));
+    });
+}
+
+loadRating();
+function loadReviews() {
+  fetch(`/reviews/${productId}`)
+    .then(res => res.json())
+    .then(data => {
+      const box = document.getElementById("reviewList");
+      box.innerHTML = "";
+
+      if (data.length === 0) {
+        box.innerHTML = "<p>No reviews yet.</p>";
+        return;
+      }
+
+      data.forEach(r => {
+        const div = document.createElement("div");
+        div.style.padding = "12px";
+        div.style.background = "#fff";
+        div.style.borderRadius = "10px";
+        div.style.marginBottom = "10px";
+        div.style.boxShadow = "0 4px 10px rgba(0,0,0,0.05)";
+
+        div.innerHTML = `
+          <div style="font-weight:700">${r.userName}</div>
+          <div style="color:#f59e0b">${"★".repeat(r.rating)}</div>
+          <p>${r.message}</p>
+          <small style="color:#666">${new Date(r.date).toLocaleString()}</small>
+        `;
+
+        box.appendChild(div);
+      });
+    });
+}
+
+loadReviews();
+function submitReview() {
+  const message = document.getElementById("reviewMessage").value.trim();
+  const rating = document.getElementById("reviewRating").value;
+
+  fetch("/review", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      productId,
+      message,
+      rating
+    })
+  })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        document.getElementById("reviewMessage").value = "";
+        loadReviews();
+        loadRating();
+      } 
+    });
+}
+</script>
+<script>
+  // Brand logo map
+const brandLogos = {
+  "Hyundai": "https://th.bing.com/th/id/R.35647c0cec927537fa43ed1836a446c2?rik=7Lzu71WwPczowA&riu=http%3a%2f%2fpluspng.com%2fimg-png%2fhyundai-logo-png-hyundai-car-logo-png-brand-image-1749.png&ehk=UI8O%2bS7ci5lpalKI9Rf1u%2bMYvCgw%2bVwAeupMAcxmk2g%3d&risl=&pid=ImgRaw&r=0",
+  "Tata": "https://upload.wikimedia.org/wikipedia/commons/1/1d/Tata_logo.svg",
+  "Bajaj": "https://upload.wikimedia.org/wikipedia/commons/5/55/Bajaj_Logo.svg"
+};
+const brandLogo = document.getElementById('brandLogo');
+const manufacturer = document.getElementById('manufacturer');
+
+</script>
+<script>
+  // --- Replace your old getDeliveryDate() with this ---
+function getDeliveryDate(daysAhead = 6) {
+  const now = new Date();
+
+  // compute ETA = today + daysAhead
+  const eta = new Date(now);
+  eta.setDate(eta.getDate() + Number(daysAhead));
+
+  // friendly text
+  // If daysAhead === 1 -> "Tomorrow"
+  // If daysAhead === 0 -> "Today"
+  // Else -> weekday + date
+  let human;
+  if (daysAhead === 0) {
+    human = "Today";
+  } else if (daysAhead === 1) {
+    human = "Tomorrow";
+  } else {
+    // e.g. "Mon, Dec 16 2025 (in 4 days)"
+    const opts = { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' };
+    human = `${eta.toLocaleDateString(undefined, opts)} (in ${daysAhead} days)`;
+  }
+
+  const el = document.getElementById("etaDate");
+  if (el) el.textContent = human;
+
+  // Optionally return the date object if needed
+  return eta;
+}
+
+// call it with 4 days
+getDeliveryDate(6);
+
+</script>
+</body>
+</html>
