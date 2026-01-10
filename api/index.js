@@ -1,18 +1,27 @@
 const express = require("express");
+const path = require("path");
 
 const app = express();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-/* ✅ Health check */
+/* Views */
+app.set("view engine", "ejs");
+app.set("views", path.join(process.cwd(), "backend", "views"));
+
+/* Routes */
+const routes = require("../backend/routes");
+app.use("/", routes);
+
+/* Root route */
 app.get("/", (req, res) => {
-  res.status(200).send("✅ Express serverless function is working");
+  res.render("index");
 });
 
-/* ✅ API test */
-app.get("/api/test", (req, res) => {
-  res.json({ success: true });
+/* Fallback */
+app.use((req, res) => {
+  res.status(404).send("404 - Not Found");
 });
 
 module.exports = app;
