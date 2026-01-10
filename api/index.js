@@ -15,8 +15,9 @@ app.get("/", (req, res) => {
 });
 
 /* ✅ Your existing routes */
-const routes = require("../routes");
+const routes = require("../backend/routes");
 app.use("/", routes);
+
 
 /* ✅ Fallback for unknown routes (prevents 404 on Vercel) */
 app.use((req, res) => {
