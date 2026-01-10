@@ -1,3 +1,9 @@
-module.exports = (req, res) => {
-  res.status(200).send("Vercel function is working");
-};
+const express = require("express");
+
+const app = express();
+
+app.get("/", (req, res) => {
+  res.send("Express is running on Vercel");
+});
+
+module.exports = app;
