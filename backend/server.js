@@ -44,8 +44,7 @@ app.use((req, res, next) => {
 
 
 // ====== MongoDB Connection ======
-const MONGO_URI = 'mongodb://127.0.0.1:27017/akc_auto_parts';
-
+const MONGO_URI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/akc_auto_parts';
 mongoose.connect(MONGO_URI)
   .then(() => console.log("MongoDB Connected"))
   .catch(err => console.log(err));
