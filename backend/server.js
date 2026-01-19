@@ -21,7 +21,7 @@ app.use(cookieParser()); // 🔥 REQUIRED
 app.use(require("./middleware/language")); // 🔥 REQUIRED
 
 // routes BELOW this
-app.use("/", require("./routes/userRoutes"));
+app.use("/", require("./routes/index"));
 
 
 app.use(session({
