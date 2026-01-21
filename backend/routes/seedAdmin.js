@@ -26,7 +26,7 @@ async function createAdmin() {
     await sequelize.authenticate();
     console.log('DB connected');
 
-    const email = '[email protected]';    // choose your admin email
+    const email = 'admin@gmail.com';    // choose your admin email
     const password = 'admin123';          // TEMP password, change later
 
     const [admin, created] = await User.findOrCreate({
