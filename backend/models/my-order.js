@@ -1,38 +1,80 @@
-const mongoose = require("mongoose");
+const { DataTypes } = require("sequelize");
+const sequelize = require("../config/database");
 
-const orderSchema = new mongoose.Schema(
+const Order = sequelize.define(
+  "Order",
   {
-    userId: String,
-
-    customerName: String,
-    address: String,
-    city: String,
-    state: String,
-    phone: String,
-    pin: String,
-
-    totalPrice: Number,
-
-    paymentMethod: String,
-    paymentStatus: String,
-
-    status: {
-      type: String,
-      default: "Pending"
+    id: {
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
+      primaryKey: true
     },
 
-    items: [
-      {
-        id: String,
-        name: String,
-        qty: Number,
-        price: Number
-      }
-    ]
+    userId: {
+      type: DataTypes.INTEGER,
+      allowNull: false
+    },
+
+    customerName: {
+      type: DataTypes.STRING,
+      allowNull: false
+    },
+
+    address: {
+      type: DataTypes.STRING,
+      allowNull: false
+    },
+
+    city: {
+      type: DataTypes.STRING,
+      allowNull: false
+    },
+
+    state: {
+      type: DataTypes.STRING,
+      allowNull: false
+    },
+
+    phone: {
+      type: DataTypes.STRING,
+      allowNull: false
+    },
+
+    pin: {
+      type: DataTypes.STRING,
+      allowNull: false
+    },
+
+    totalPrice: {
+      type: DataTypes.FLOAT,
+      allowNull: false
+    },
+
+    paymentMethod: {
+      type: DataTypes.STRING,
+      allowNull: false
+    },
+
+    paymentStatus: {
+      type: DataTypes.STRING,
+      defaultValue: "Pending"
+    },
+
+    status: {
+      type: DataTypes.STRING,
+      defaultValue: "Pending"
+    },
+
+    // ⭐ MOST IMPORTANT FIX
+    items: {
+      type: DataTypes.JSONB,
+      allowNull: false
+    }
   },
   {
-    timestamps: true   // ⭐ MOST IMPORTANT
+    tableName: "orders",
+    timestamps: true
   }
 );
 
-module.exports = mongoose.model("Order", orderSchema);
+module.exports = Order;

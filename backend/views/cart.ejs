@@ -213,6 +213,83 @@ input[type="number"]:focus{
   background:#e5e7eb;
   color:#111827;
 }
+
+/* ================= LANGUAGE DROPDOWN ================= */
+
+.lang-select {
+  position: relative;
+  display: inline-block;
+}
+
+.lang-select select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+
+  background: #ffffff;
+  border: 2px solid #2563eb;
+  border-radius: 8px;
+
+  padding: 8px 36px 8px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #2563eb;
+
+  cursor: pointer;
+  outline: none;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.12);
+}
+
+.lang-select select:hover {
+  border-color: #1e40af;
+  background: #f0f9ff;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+}
+
+.lang-select select:focus {
+  border-color: #1e40af;
+  background: #f0f9ff;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1), 0 4px 12px rgba(37, 99, 235, 0.2);
+}
+
+.lang-select::after {
+  content: "🌐";
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 16px;
+  pointer-events: none;
+  transition: transform 0.3s ease;
+}
+
+.lang-select select:hover::after {
+  transform: translateY(-50%) scale(1.1);
+}
+
+.lang-select select:focus::after {
+  transform: translateY(-50%) scale(1.15);
+}
+
+.lang-select select option {
+  background: #ffffff;
+  color: #2563eb;
+  padding: 8px;
+  font-weight: 600;
+}
+
+.lang-select select option:hover {
+  background: #2563eb;
+  color: #ffffff;
+}
+
+.lang-select select option:checked {
+  background: #2563eb;
+  color: #ffffff;
+  font-weight: 700;
+}
+
 </style>
 
 </head>
@@ -236,7 +313,7 @@ input[type="number"]:focus{
   </a>
 
   <div style="margin-left:auto;color:var(--muted);font-size:14px;">
-    Parts for Hyundai • Tata • Bajaj
+    <%= t.partsFor %>
   </div>
 
 </header>
@@ -246,32 +323,35 @@ input[type="number"]:focus{
   <table>
     <thead>
       <tr>
-        <th>Product</th>
-        <th>Qty</th>
-        <th>Subtotal</th>
-        <th>Action</th>
+        <th><%= t.product %></th>
+        <th><%= t.qty %></th>
+        <th><%= t.subtotal %></th>
+        <th><%= t.action %></th>
       </tr>
     </thead>
     <tbody id="cartRows"></tbody>
   </table>
 
   <div class="total-box">
-    Grand Total: ₹<span id="grandTotal">0</span>
+    <%= t.grandTotal %>: ₹<span id="grandTotal">0</span>
   </div>
 
   <div style="margin-top:25px; display:flex; gap:10px; justify-content:center;">
     <button class="btn secondary btn-float" onclick="window.location.href='/'">
-      ⬅ Continue Shopping
+      ⬅ <%= t.continueShopping %>
     </button>
-    <button class="btn btn-float" onclick="goToRegistration()">
-      Checkout →
+    <button id="checkoutBtn" class="btn btn-float" onclick="goToRegistration()" disabled style="opacity: 0.5; cursor: not-allowed;">
+      <%= t.checkout %> →
     </button>
   </div>
 </div>
 
 
 <script>
-/* ---------------- CART FUNCTIONS ---------------- */
+/* Language translations */
+const t = <%- JSON.stringify(t) %>;
+
+/* CART FUNCTIONS */
 const LS_CART_KEY = 'akc_cart_v1';
 
 function loadCart(){ 
@@ -453,7 +533,7 @@ function renderCart(){
   tbody.innerHTML = '';
   
   if(cart.length === 0){
-    tbody.innerHTML = `<tr><td colspan="4" class="empty-msg">Your cart is empty 🛒</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="4" class="empty-msg">${t.cartEmpty}</td></tr>`;
     totalEl.textContent = "0";
     return;
   }
@@ -474,12 +554,26 @@ function renderCart(){
         <input type="number" min="1" value="${item.qty}" onchange="changeQty('${item.id}', this.value)">
       </td>
       <td><strong>₹${subtotal.toLocaleString()}</strong></td>
-      <td><button class="btn secondary" onclick="removeItem('${item.id}')">Remove</button></td>
+      <td><button class="btn secondary" onclick="removeItem('${item.id}')">${t.remove}</button></td>
     `;
     tbody.appendChild(tr);
   });
 
   totalEl.textContent = total.toLocaleString();
+  
+  // Update checkout button state
+  const checkoutBtn = document.getElementById('checkoutBtn');
+  if (total <= 0 || cart.length === 0) {
+    checkoutBtn.disabled = true;
+    checkoutBtn.style.opacity = '0.5';
+    checkoutBtn.style.cursor = 'not-allowed';
+    checkoutBtn.title = 'Add items to cart to proceed';
+  } else {
+    checkoutBtn.disabled = false;
+    checkoutBtn.style.opacity = '1';
+    checkoutBtn.style.cursor = 'pointer';
+    checkoutBtn.title = '';
+  }
 }
 
 function changeQty(id, value){
@@ -500,7 +594,17 @@ function removeItem(id){
 }
 
 /* ---------------- CHECKOUT PROTECTION ---------------- */
-function goToRegistration() {
+function goToRegistration() {  const cart = loadCart();
+  const total = cart.reduce((sum, item) => {
+    const p = getProduct(item.id);
+    return sum + (p ? p.price * item.qty : 0);
+  }, 0);
+
+  // Prevent checkout if cart is empty or total is 0
+  if (cart.length === 0 || total <= 0) {
+    alert(t.cartEmpty || 'Please add items to your cart before checking out');
+    return;
+  }
   const isLoggedIn = "<%= session && session.user ? 'true' : 'false' %>";
 
   if (isLoggedIn !== "true") {
@@ -525,12 +629,12 @@ document.addEventListener('DOMContentLoaded', renderCart);
 <!-- ---------------- SIGN-IN POPUP HTML ---------------- -->
 <div id="signinPopup" class="popup-overlay">
   <div class="popup-box">
-    <h3>Sign in Required</h3>
-    <p>You need to sign in before checking out.</p>
+    <h3><%= t.pleaseSignIn %></h3>
+    <p><%= t.mustSignInCheckout %></p>
 
     <div class="popup-actions">
-      <button class="popup-btn signin" onclick="goToSignin()">Sign In</button>
-      <button class="popup-btn cancel" onclick="closePopup()">Cancel</button>
+      <button class="popup-btn signin" onclick="goToSignin()"><%= t.signIn %></button>
+      <button class="popup-btn cancel" onclick="closePopup()"><%= t.no %></button>
     </div>
   </div>
 </div>

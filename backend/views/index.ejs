@@ -810,6 +810,7 @@ select.sort:focus{
 
 .lang-select {
   position: relative;
+  display: inline-block;
 }
 
 .lang-select select {
@@ -817,46 +818,68 @@ select.sort:focus{
   -webkit-appearance: none;
   -moz-appearance: none;
 
-  background: rgba(255, 255, 255, 0.75);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  background: #ffffff;
+  border: 2px solid #2563eb;
+  border-radius: 8px;
 
-  border: 1px solid rgba(0,0,0,0.1);
-  border-radius: 10px;
-
-  padding: 8px 36px 8px 14px;
-  font-size: 14px;
-  font-weight: 700;
-  color: #111827;
+  padding: 8px 36px 8px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #2563eb;
 
   cursor: pointer;
   outline: none;
-  transition: all 0.25s ease;
-
-  box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.12);
 }
 
-/* hover */
 .lang-select select:hover {
-  border-color: #ea580c;
+  border-color: #1e40af;
+  background: #f0f9ff;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
 }
 
-/* focus */
 .lang-select select:focus {
-  border-color: #ea580c;
-  box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.25);
+  border-color: #1e40af;
+  background: #f0f9ff;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1), 0 4px 12px rgba(37, 99, 235, 0.2);
 }
 
-/* arrow icon */
 .lang-select::after {
-  content: "▾";
+  content: "🌐";
   position: absolute;
-  right: 12px;
+  right: 8px;
   top: 50%;
   transform: translateY(-50%);
-  font-size: 14px;
-  color: #374151;
+  font-size: 16px;
   pointer-events: none;
+  transition: transform 0.3s ease;
+}
+
+.lang-select select:hover::after {
+  transform: translateY(-50%) scale(1.1);
+}
+
+.lang-select select:focus::after {
+  transform: translateY(-50%) scale(1.15);
+}
+
+.lang-select select option {
+  background: #ffffff;
+  color: #2563eb;
+  padding: 8px;
+  font-weight: 600;
+}
+
+.lang-select select option:hover {
+  background: #2563eb;
+  color: #ffffff;
+}
+
+.lang-select select option:checked {
+  background: #2563eb;
+  color: #ffffff;
+  font-weight: 700;
 }
 
 </style>
@@ -865,21 +888,24 @@ select.sort:focus{
 
 <!-- TOPBAR -->
 <header class="topbar">
-<h1 style="color:red"><%= t.test %></h1>
-
 
   <div class="logo">
-    <img src="https://th.bing.com/th/id/R.35647c0cec927537fa43ed1836a446c2?rik=7Lzu71WwPczowA&riu=http%3a%2f%2fpluspng.com%2fimg-png%2fhyundai-logo-png-hyundai-car-logo-png-brand-image-1749.png&ehk=UI8O%2bS7ci5lpalKI9Rf1u%2bMYvCgw%2bVwAeupMAcxmk2g%3d&risl=&pid=ImgRaw&r=0" alt="Hyundai logo">
+   <a href="/" class="logo-link">
+  <img src="https://th.bing.com/th/id/R.35647c0cec927537fa43ed1836a446c2?rik=7Lzu71WwPczowA&riu=http%3a%2f%2fpluspng.com%2fimg-png%2fhyundai-logo-png-hyundai-car-logo-png-brand-image-1749.png&ehk=UI8O%2bS7ci5lpalKI9Rf1u%2bMYvCgw%2bVwAeupMAcxmk2g%3d&risl=&pid=ImgRaw&r=0" alt="AKC Auto Parts Logo" class="logo">
+</a>
+
     <div class="brand">AKC AUTO PARTS</div>
   </div>
 
   <div style="display:flex; align-items:center; gap:12px; margin-left:18px;">
     <div class="muted">Parts for Hyundai • Tata • Bajaj</div>
   </div>
-  <select id="languageSelect">
-  <option value="en">English</option>
-  <option value="hi">हिंदी</option>
-</select>
+  <div class="lang-select">
+    <select id="languageSelect">
+      <option value="en">English</option>
+      <option value="hi">हिंदी</option>
+    </select>
+  </div>
 
 <script>
 document.getElementById("languageSelect").value = "<%= lang %>";
@@ -912,26 +938,26 @@ document.getElementById("languageSelect").addEventListener("change", function ()
 
     <% if (session && session.user) { %>
     <button class="btn" style="background:#dc2626;" onclick="openSignoutPopup()">
-  Sign Out
+  <%= t.signOut %>
 </button>
 
     <% } else { %>
       <button class="btn secondary" onclick="window.location.href='/signin'">
-        Sign In
+        <%= t.signIn %>
       </button>
       <button class="btn" onclick="window.location.href='/signup'">
-        Sign Up
+        <%= t.signUp %>
       </button>
     <% } %>
    <!-- SIGN-OUT CONFIRM POPUP -->
 <div id="signoutPopup" class="popup-overlay">
   <div class="popup-box">
-    <h3>Confirm Sign Out</h3>
-    <p>Do you want to sign out?</p>
+    <h3><%= t.confirmSignout %></h3>
+    <p><%= t.confirmSignoutMessage %></p>
 
     <div class="popup-actions">
-      <button class="popup-btn yes" onclick="confirmSignout()">Yes</button>
-      <button class="popup-btn no" onclick="closeSignoutPopup()">No</button>
+      <button class="popup-btn yes" onclick="confirmSignout()"><%= t.yes %></button>
+      <button class="popup-btn no" onclick="closeSignoutPopup()"><%= t.no %></button>
     </div>
   </div>
 </div>
@@ -960,7 +986,7 @@ document.getElementById("languageSelect").addEventListener("change", function ()
 
   <div class="promo-slide active">
     <div class="text-box">
-      <div class="text">Free Delivery*</div>
+      <div class="text"><%= t.freeDelivery %></div>
       <div class="sub">On orders above ₹2,500 — Fast & insured delivery</div>
     </div>
     <img src="https://png.pngtree.com/png-vector/20230219/ourmid/pngtree-free-delivery-label-vector-illustration-png-image_6607963.png" class="promo-img"/>
@@ -968,7 +994,7 @@ document.getElementById("languageSelect").addEventListener("change", function ()
 
   <div class="promo-slide">
     <div class="text-box">
-      <div class="text">Original Parts Guaranteed</div>
+      <div class="text"><%= t.originalParts %></div>
       <div class="sub">100% genuine Hyundai, Tata & Bajaj auto components</div>
     </div>
     <img src="https://png.pngtree.com/png-vector/20221009/ourmid/pngtree-100-original-stamp-and-badget-design-red-grunge-png-image_6293834.png" class="promo-img"/>
@@ -984,33 +1010,33 @@ document.getElementById("languageSelect").addEventListener("change", function ()
 
 </div>
 <div class="why-us-header">
-  <h2>Why Choose AKC Auto Parts?</h2>
-  <p>Trusted by mechanics & vehicle owners across Uttar Pradesh</p>
+  <h2><%= t.whyChoose %></h2>
+  <p><%= t.trustedBy %></p>
 </div>
 
  <section class="why-us-section">
   <div class="why-us-card">
     <span class="icon">🛠</span>
-    <h4>Genuine OEM Parts</h4>
-    <p>100% original & manufacturer-approved parts</p>
+    <h4><%= t.genuineOEM %></h4>
+    <p><%= t.genuineOEMDesc %></p>
   </div>
 
   <div class="why-us-card">
     <span class="icon">🚚</span>
-    <h4>Fast  Delivery</h4>
-    <p>Quick & reliable delivery </p>
+    <h4><%= t.fastDelivery %></h4>
+    <p><%= t.fastDeliveryDesc %></p>
   </div>
 
   <div class="why-us-card">
     <span class="icon">🔒</span>
-    <h4>Secure Payments</h4>
-    <p>Cash on delivery and online payment support</p>
+    <h4><%= t.securePayments %></h4>
+    <p><%= t.securePaymentsDesc %></p>
   </div>
 
   <div class="why-us-card">
     <span class="icon">📞</span>
-    <h4>Expert Support</h4>
-    <p>Auto parts experts ready to help you</p>
+    <h4><%= t.expertSupport %></h4>
+    <p><%= t.expertSupportDesc %></p>
   </div>
 </section>
 
@@ -1023,13 +1049,13 @@ document.getElementById("languageSelect").addEventListener("change", function ()
       <input id="miniSearch" placeholder="Search by parts..." oninput="applyFilters()" />
     </div>
         <select class="select" id="manufacturerSelect" onchange="quickFilterManufacturer()">
-          <option value="">All Manufacturers</option>
+          <option value=""><%= t.allManufacturers %></option>
           <option value="Hyundai">Hyundai</option>
           <option value="Tata">Tata</option>
           <option value="Bajaj">Bajaj</option>
         </select>
         <select class="select" id="categorySelect" onchange="quickFilterCategory()">
-          <option value="">All Categories</option>
+          <option value=""><%= t.allCategories %></option>
           <option value="Engine">Engine</option>
           <option value="Brake">Brake</option>
           <option value="Electrical">Electrical</option>
@@ -1209,21 +1235,7 @@ hy.forEach(it => {
     )
   );
 });
-const ta = [
-  ["Diesel Engine","Engine", 8000],["Heavy Brake Shoe","Brake", 2600],["Hydraulic Pump","Engine", 7000],["Axle Shaft","Body", 5400],["Gearbox","Engine", 9000],
-  ["Turbocharger","Engine", 9500],["Fuel Injector","Engine", 4800],["Transmission Assembly","Engine", 15000],["Leaf Spring","Suspension", 4200],["Wheel Hub","Body", 3100],
-  ["Radiator Tank","Engine", 6000],["AC Blower","Electrical", 2800],["Diesel Filter","Engine", 1300],["Heavy Tyre","Body", 5500],["Clutch Booster","Engine", 4300],
-  ["Propeller Shaft","Engine", 7200],["Starter Motor","Electrical", 3900],["Alternator Heavy","Electrical", 5800],["Steering Column","Body", 3600],["Air Drum","Body", 2700]
-];
-ta.forEach((it,i)=> products.push(createPart("Tata", it[0], it[1], `TA${200+i}`, it[2])));
 
-const bj = [
-  ["Bike Engine","Engine", 6000],["Front Brake","Brake", 900],["Rear Brake","Brake", 850],["Silencer","Body", 2000],["Bike Chain","Body", 1200],
-  ["Carburetor","Engine", 1800],["Fuel Tank","Body", 2500],["Headlamp","Electrical", 950],["Backlight","Electrical", 650],["Shock Absorber","Suspension", 1900],
-  ["Meter Console","Electrical", 2100],["Battery","Electrical", 2200],["Air Filter","Engine", 450],["Clutch Wire","Engine", 300],["Throttle Body","Engine", 2600],
-  ["Piston Kit","Engine", 2800],["Brake Lever","Brake", 450],["Indicator Light","Electrical", 220],["Alloy Wheel","Body", 3200],["Bike Seat","Body", 1500]
-];
-bj.forEach((it,i)=> products.push(createPart("Bajaj", it[0], it[1], `BJ${300+i}`, it[2])));
 
 /* ------------ Cart LocalStorage ------------ */
 const LS_CART_KEY = 'akc_cart_v1';

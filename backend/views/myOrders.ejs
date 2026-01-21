@@ -254,6 +254,80 @@ body{
 .yes-btn:hover { background: #dc2626; }
 .no-btn:hover { background: #4b5563; }
 
+/* Language Dropdown */
+.lang-select {
+  position: relative;
+  display: inline-block;
+}
+
+.lang-select select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+
+  background: #ffffff;
+  border: 2px solid #2563eb;
+  border-radius: 8px;
+
+  padding: 8px 36px 8px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #2563eb;
+
+  cursor: pointer;
+  outline: none;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.12);
+}
+
+.lang-select select:hover {
+  border-color: #1e40af;
+  background: #f0f9ff;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+}
+
+.lang-select select:focus {
+  border-color: #1e40af;
+  background: #f0f9ff;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1), 0 4px 12px rgba(37, 99, 235, 0.2);
+}
+
+.lang-select::after {
+  content: "🌐";
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 16px;
+  pointer-events: none;
+  transition: transform 0.3s ease;
+}
+
+.lang-select select:hover::after {
+  transform: translateY(-50%) scale(1.1);
+}
+
+.lang-select select:focus::after {
+  transform: translateY(-50%) scale(1.15);
+}
+
+.lang-select select option {
+  background: #ffffff;
+  color: #2563eb;
+  padding: 8px;
+  font-weight: 600;
+}
+
+.lang-select select option:hover {
+  background: #2563eb;
+  color: #ffffff;
+}
+
+.lang-select select option:checked {
+  background: #2563eb;
+  color: #ffffff;
+  font-weight: 700;
+}
 
 </style>
 </head>
@@ -272,11 +346,11 @@ body{
   </div>
 
   <div class="center-section">
-    <h1>MY ORDERS</h1>
+    <h1><%= t.myOrders %></h1>
   </div>
 
   <div class="right-section">
-    <p>Parts for Hyundai • Tata • Bajaj</p>
+    <p><%= t.partsFor %></p>
   </div>
 </div>
 
@@ -285,7 +359,7 @@ body{
 
   <% if (!orders || orders.length === 0) { %>
     <p style="text-align:center;font-size:20px;color:#333;">
-      You have not placed any orders yet.
+      <%= t.noOrders %>
     </p>
   <% } %>
 
@@ -295,6 +369,8 @@ body{
       const orderDate = new Date(order.createdAt);
       const now = new Date();
       const diffDays = Math.floor((now - orderDate) / (1000 * 60 * 60 * 24));
+      const deliveryDate = new Date(orderDate);
+      deliveryDate.setDate(deliveryDate.getDate() + 6);
     %>
 
     <!-- ORDER CARD -->
@@ -302,20 +378,20 @@ body{
 
       <!-- STATUS BADGE -->
       <% if (order.status === "Pending") { %>
-        <span class="status placed-status">Order Placed</span>
+        <span class="status placed-status"><%= t.orderPending %></span>
       <% } else if (order.status === "Delivered") { %>
-        <span class="status delivered-status">Delivered</span>
+        <span class="status delivered-status"><%= t.orderDelivered %></span>
       <% } else { %>
-        <span class="status cancelled-status">Cancelled</span>
+        <span class="status cancelled-status"><%= t.orderCancelled %></span>
       <% } %>
 
       <!-- HEADER -->
       <div class="order-header">
         <div>
-          <p><strong>Order Date:</strong> <%= orderDate.toDateString() %></p>
-          <p><strong>Total Price:</strong> ₹<%= order.totalPrice %></p>
-          <p><strong>Delivery Date:</strong>
-            <%= order.deliveryDate || "To be updated" %>
+          <p><strong><%= t.orderDate %>:</strong> <%= orderDate.toDateString() %></p>
+          <p><strong><%= t.totalPrice %>:</strong> ₹<%= order.totalPrice %></p>
+          <p><strong><%= t.deliveryDate %>:</strong>
+            <%= deliveryDate.toDateString() %>
           </p>
         </div>
       </div>
@@ -344,8 +420,17 @@ body{
       </div>
 
       <!-- ITEMS -->
-      <% if (order.items && order.items.length) { %>
-        <% order.items.forEach(function(item){ %>
+      <%
+  let items = order.items;
+
+  if (typeof items === "string") {
+    items = JSON.parse(items);
+  }
+%>
+
+<% if (items && items.length > 0) { %>
+  <% items.forEach(function(item){ %>
+
           <div class="item-box">
             <p>Name: <%= item.name %></p>
             <p>Product ID: <%= item.id %></p>
@@ -357,7 +442,8 @@ body{
 
       <!-- ACTION -->
       <% if (order.status === "Pending") { %>
-        <button class="cancel-btn" onclick="cancelOrder('<%= order._id %>')">
+        <button class="cancel-btn" onclick="cancelOrder('<%= order.id %>')"
+>
           Cancel Order
         </button>
       <% } else if (order.status === "Delivered") { %>
@@ -377,11 +463,11 @@ body{
 <!-- CONFIRM CANCEL POPUP -->
 <div id="confirmPopup">
   <div class="popup-content">
-    <h3>Cancel Order</h3>
-    <p>Are you sure you want to cancel this order?</p>
+    <h3><%= t.confirmCancel %></h3>
+    <p><%= t.areYouSure %></p>
     <div class="popup-buttons">
-      <button class="yes-btn" onclick="confirmCancel()">Yes</button>
-      <button class="no-btn" onclick="closeConfirm()">No</button>
+      <button class="yes-btn" onclick="confirmCancel()"><%= t.yes %></button>
+      <button class="no-btn" onclick="closeConfirm()"><%= t.no %></button>
     </div>
   </div>
 </div>
@@ -389,8 +475,8 @@ body{
 <!-- SUCCESS POPUP -->
 <div id="successPopup">
   <div class="popup-content">
-    <h3>Cancelled</h3>
-    <p>Order Cancelled Successfully ✔</p>
+    <h3><%= t.orderCancelled %></h3>
+    <p><%= t.orderCancelledSuccess %></p>
   </div>
 </div>
 

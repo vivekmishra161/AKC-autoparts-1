@@ -1,18 +1,37 @@
-const mongoose = require('mongoose');
+const { DataTypes } = require("sequelize");
+const sequelize = require("../config/database");
 
-const userSchema = new mongoose.Schema(
-  {
-    name: { type: String, required: true },
-    email: { type: String, required: true, unique: true },
-    password: { type: String, required: true },
-    role: {
-      type: String,
-      enum: ['user', 'admin'],
-      default: 'user'
-    }
+const User = sequelize.define("User", {
+  id: {
+    type: DataTypes.INTEGER,
+    autoIncrement: true,
+    primaryKey: true
   },
-  { timestamps: true }
-);
 
-// ✅ SAFE EXPORT (prevents OverwriteModelError)
-module.exports = mongoose.models.User || mongoose.model('User', userSchema);
+  name: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+
+  email: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    unique: true
+  },
+
+  password: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+
+  role: {
+    type: DataTypes.ENUM("user", "admin"),
+    defaultValue: "user"
+  }
+
+}, {
+  tableName: "users",
+  timestamps: true
+});
+
+module.exports = User;

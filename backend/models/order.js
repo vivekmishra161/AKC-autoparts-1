@@ -1,47 +1,32 @@
-const mongoose = require("mongoose");
+const { DataTypes } = require("sequelize");
+const sequelize = require("../config/database");
 
-const orderSchema = new mongoose.Schema({
+const Order = sequelize.define("Order", {
   userId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
-    required: true
+    type: DataTypes.INTEGER,
+    allowNull: false
   },
 
-  customerName: String,
-  address: String,
-  city: String,
-  state: String,
-  phone: String,
-  pin: String,
+  customerName: DataTypes.STRING,
+  address: DataTypes.STRING,
+  city: DataTypes.STRING,
+  state: DataTypes.STRING,
+  phone: DataTypes.STRING,
+  pin: DataTypes.STRING,
 
-  totalPrice: Number,
+  totalPrice: DataTypes.FLOAT,
 
-  paymentMethod: {
-    type: String,
-    enum: ["COD", "UPI"],
-    required: true
-  },
+  paymentMethod: DataTypes.STRING,
+  paymentStatus: DataTypes.STRING,
+  status: DataTypes.STRING,
 
-  paymentStatus: {
-    type: String,
-    enum: ["Pending Verification", "Paid", "Failed"],
-    default: "Pending Verification"
-  },
+  // ✅ IMPORTANT FIX
+  items: {
+    type: DataTypes.JSON,   // 🔥 this fixes everything
+    allowNull: false
+  }
+  
 
-  status: {
-    type: String,
-    enum: ["Pending", "Packed", "Delivered", "Cancelled"],
-    default: "Pending"
-  },
+});
 
-  items: [
-    {
-      id: String,
-      name: String,
-      qty: Number,
-      price: Number
-    }
-  ]
-}, { timestamps: true });
-
-module.exports = mongoose.model("Order", orderSchema);
+module.exports = Order;

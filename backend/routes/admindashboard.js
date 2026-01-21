@@ -1,23 +1,39 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const adminAuth = require('../middleware/adminAuth');
-const Order = require('../models/order');
 
-router.get('/dashboard', adminAuth, async (req, res) => {
+const adminAuth = require("../middleware/adminAuth");
+const Order = require("../models/order");
+
+router.get("/dashboard", adminAuth, async (req, res) => {
   try {
-    const totalOrders = await Order.countDocuments();
-    const delivered = await Order.countDocuments({ status: "Delivered" });
-    const cancelled = await Order.countDocuments({ status: "Cancelled" });
-    const pending = await Order.countDocuments({ status: "Pending" });
-    const packed = await Order.countDocuments({ status: "Packed" });
+    const totalOrders = await Order.count();
 
-    const deliveredOrders = await Order.find({ status: "Delivered" });
+    const delivered = await Order.count({
+      where: { status: "Delivered" }
+    });
+
+    const cancelled = await Order.count({
+      where: { status: "Cancelled" }
+    });
+
+    const pending = await Order.count({
+      where: { status: "Pending" }
+    });
+
+    const packed = await Order.count({
+      where: { status: "Packed" }
+    });
+
+    const deliveredOrders = await Order.findAll({
+      where: { status: "Delivered" }
+    });
+
     const totalRevenue = deliveredOrders.reduce(
       (sum, o) => sum + o.totalPrice,
       0
     );
 
-    res.render('admin/dashboard', {
+    res.render("admin/dashboard", {
       totalOrders,
       delivered,
       cancelled,
@@ -27,8 +43,9 @@ router.get('/dashboard', adminAuth, async (req, res) => {
     });
 
   } catch (err) {
-    console.error(err);
-    res.render('admin/dashboard', {
+    console.error("Dashboard error:", err);
+
+    res.render("admin/dashboard", {
       totalOrders: 0,
       delivered: 0,
       cancelled: 0,

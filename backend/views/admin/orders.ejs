@@ -186,6 +186,44 @@ td:last-child{
   border-color:#2563eb;
   box-shadow:0 0 0 4px rgba(37,99,235,.15);
 }
+/* ===== PAYMENT TYPE ===== */
+.pay-type {
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 900;
+  display: inline-block;
+}
+
+.pay-type.COD {
+  background: #f1f5f9;
+  color: #334155;
+}
+
+.pay-type.UPI {
+  background: #eef2ff;
+  color: #3730a3;
+}
+
+/* ===== PAYMENT STATUS ===== */
+.pay-status {
+  padding: 8px 16px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 900;
+  border: 1px solid #e5e7eb;
+  cursor: pointer;
+}
+
+.pay-status.PAYMENT_PENDING {
+  background: #fff7ed;
+  color: #92400e;
+}
+
+.pay-status.PAID {
+  background: #ecfdf5;
+  color: #065f46;
+}
 
 </style>
 
@@ -214,6 +252,8 @@ td:last-child{
   <th>Part Name</th>
   <th>Part ID</th>
   <th>Total</th>
+  <th>Payment Type</th>
+<th>Payment Status</th>
   <th>Status</th>
   <th>Date</th>
 </tr>
@@ -248,10 +288,38 @@ td:last-child{
   <td style="font-weight:700;color:#2563eb;">
     ₹ <%= o.totalPrice %>
   </td>
+<!-- PAYMENT TYPE -->
+<td>
+  <span class="pay-type <%= o.paymentMethod %>">
+    <%= o.paymentMethod %>
+  </span>
+</td>
+
+<!-- PAYMENT STATUS -->
+<td>
+  <select
+    onchange="updatePaymentStatus('<%= o.id %>', this.value)"
+    class="pay-status <%= o.paymentStatus %>">
+
+    <option value="PAYMENT_PENDING"
+      <%= o.paymentStatus === "PAYMENT_PENDING" ? "selected" : "" %>>
+      Pending
+    </option>
+
+    <option value="PAID"
+      <%= o.paymentStatus === "PAID" ? "selected" : "" %>>
+      Paid
+    </option>
+
+  </select>
+</td>
+
+
+
 
   <!-- STATUS -->
   <td>
-    <select onchange="updateStatus('<%= o._id %>', this.value)" class="<%= o.status %>">
+    <select onchange="updateStatus('<%= o.id %>', this.value)" class="<%= o.status %>">
       <option value="Pending" <%= o.status === "Pending" ? "selected" : "" %>>Pending</option>
       <option value="Packed" <%= o.status === "Packed" ? "selected" : "" %>>Packed</option>
       <option value="Delivered" <%= o.status === "Delivered" ? "selected" : "" %>>Delivered</option>
@@ -296,6 +364,28 @@ function searchOrders() {
   });
 }
 </script>
+<script>
+function updatePaymentStatus(orderId, paymentStatus) {
+  fetch("/admin/update-payment-status", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ orderId, paymentStatus })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.success) {
+      const select = event.target;
 
+      // remove old classes
+      select.classList.remove("PAID", "PAYMENT_PENDING");
+
+      // add new class
+      select.classList.add(paymentStatus);
+    }
+  });
+}
+
+
+</script>
 </body>
 </html>
