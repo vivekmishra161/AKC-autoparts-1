@@ -40,7 +40,11 @@ app.use(
   session({
     secret: "AKC_SECRET_KEY_123",
     resave: false,
-    saveUninitialized: true
+    saveUninitialized: false, // Change this to false
+    cookie: { 
+      secure: false, // Set to true ONLY if using HTTPS
+      maxAge: 24 * 60 * 60 * 1000 // 24 hours
+    }
   })
 );
 
