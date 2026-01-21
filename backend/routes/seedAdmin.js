@@ -26,6 +26,10 @@ async function createAdmin() {
     await sequelize.authenticate();
     console.log('DB connected');
 
+    // ADD THIS LINE BELOW:
+    await sequelize.sync(); 
+    console.log('Tables synchronized/created');
+
     const email = 'admin@gmail.com';    // choose your admin email
     const password = 'admin123';          // TEMP password, change later
 
